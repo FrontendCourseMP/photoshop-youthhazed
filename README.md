@@ -28,4 +28,7 @@ npm run build
 
 ## Хостинг
 
-Ссылка на опубликованную страницу: указать после публикации.
+Опубликованная страница: <https://frontendcoursemp.github.io/photoshop-youthhazed/>
+
+Деплой выполняется автоматически из ветки `main` через GitHub Actions
+(workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)).
