@@ -28,7 +28,7 @@ npm run build
 
 ## Хостинг
 
-Опубликованная страница: <https://frontendcoursemp.github.io/photoshop-youthhazed/>
+Опубликованная страница: <ВСТАВЬТЕ_ССЫЛКУ_NETLIFY>
 
-Деплой выполняется автоматически из ветки `main` через GitHub Actions
-(workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)).
+Деплой выполняется автоматически из ветки `main` на Netlify
+(конфигурация в [`netlify.toml`](netlify.toml)).
