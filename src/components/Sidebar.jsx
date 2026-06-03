@@ -14,6 +14,7 @@ export default function Sidebar({
   descriptors,
   channels,
   onToggleChannel,
+  onOpenLevels,
 }) {
   return (
     <aside className="panel">
@@ -46,6 +47,13 @@ export default function Sidebar({
             Пипетка
           </button>
         </div>
+      </section>
+
+      <section>
+        <h2>Коррекция</h2>
+        <button className="button wide-button" type="button" onClick={onOpenLevels} disabled={!hasImage}>
+          Уровни…
+        </button>
       </section>
 
       <section>

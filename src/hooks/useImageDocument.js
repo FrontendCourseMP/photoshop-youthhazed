@@ -22,6 +22,18 @@ export function useImageDocument() {
     setMeta(emptyMeta);
   }, []);
 
+  // Замена изображения результатом редактирования (уровни, фильтр, ресайз).
+  // Размеры в метаданных обновляются автоматически.
+  const replaceImage = useCallback((nextImageData, metaPatch = {}) => {
+    setImageData(nextImageData);
+    setMeta((prev) => ({
+      ...prev,
+      width: nextImageData.width,
+      height: nextImageData.height,
+      ...metaPatch,
+    }));
+  }, []);
+
   const load = useCallback(
     async (file) => {
       try {
@@ -54,5 +66,5 @@ export function useImageDocument() {
     [imageData, meta.fileName, setStatusMessage],
   );
 
-  return { imageData, meta, status, isError, load, clear, save };
+  return { imageData, meta, status, isError, load, clear, save, replaceImage };
 }

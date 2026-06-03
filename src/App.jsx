@@ -1,16 +1,18 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useImageDocument } from "./hooks/useImageDocument.js";
 import { useImageView } from "./hooks/useImageView.js";
 import Toolbar from "./components/Toolbar.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import CanvasStage from "./components/CanvasStage.jsx";
 import StatusBar from "./components/StatusBar.jsx";
+import LevelsDialog from "./components/LevelsDialog.jsx";
 
 export default function App() {
   const inputRef = useRef(null);
-  const { imageData, meta, status, isError, load, clear, save } = useImageDocument();
+  const { imageData, meta, status, isError, load, clear, save, replaceImage } = useImageDocument();
   const view = useImageView(imageData);
   const hasImage = Boolean(imageData);
+  const [levelsOpen, setLevelsOpen] = useState(false);
 
   function openFileDialog() {
     inputRef.current?.click();
@@ -22,6 +24,12 @@ export default function App() {
       load(file);
     }
     event.target.value = "";
+  }
+
+  function applyLevelsResult(nextImageData) {
+    view.setPreview(null);
+    replaceImage(nextImageData);
+    setLevelsOpen(false);
   }
 
   return (
@@ -50,6 +58,7 @@ export default function App() {
           descriptors={view.descriptors}
           channels={view.channels}
           onToggleChannel={view.toggleChannel}
+          onOpenLevels={() => setLevelsOpen(true)}
         />
 
         <CanvasStage
@@ -71,6 +80,14 @@ export default function App() {
         meta={meta}
         activeTool={view.activeTool}
         pixel={view.pixel}
+      />
+
+      <LevelsDialog
+        open={levelsOpen}
+        source={imageData}
+        onPreview={view.setPreview}
+        onApply={applyLevelsResult}
+        onClose={() => setLevelsOpen(false)}
       />
     </div>
   );

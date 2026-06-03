@@ -18,11 +18,17 @@ export function useImageView(imageData) {
   const [zoom, setZoom] = useState(1);
   const [activeTool, setActiveTool] = useState("cursor");
   const [pixel, setPixel] = useState(null);
+  // Временный предпросмотр (например, «Уровни») поверх исходника.
+  // Исходные пиксели не мутируются.
+  const [preview, setPreview] = useState(null);
 
   const characteristics = useMemo(
     () => (imageData ? getImageCharacteristics(imageData) : null),
     [imageData],
   );
+
+  // База для отрисовки: предпросмотр, если активен, иначе исходник.
+  const renderSource = preview ?? imageData;
 
   const descriptors = useMemo(
     () => (characteristics ? getChannelDescriptors(characteristics) : []),
@@ -32,12 +38,12 @@ export function useImageView(imageData) {
   const modeLabel = characteristics ? getImageModeLabel(characteristics) : "-";
 
   const visibleImageData = useMemo(() => {
-    if (!imageData || !characteristics) {
+    if (!renderSource || !characteristics) {
       return null;
     }
 
-    return composeVisibleImageData(imageData, characteristics, channels);
-  }, [imageData, characteristics, channels]);
+    return composeVisibleImageData(renderSource, characteristics, channels);
+  }, [renderSource, characteristics, channels]);
 
   const changeZoom = useCallback((nextZoom) => {
     setZoom(Math.min(8, Math.max(0.05, nextZoom)));
@@ -76,6 +82,8 @@ export function useImageView(imageData) {
 
   // Сброс вида при смене изображения и автоподгонка под холст.
   useEffect(() => {
+    setPreview(null);
+
     if (!imageData) {
       setChannels(defaultChannels);
       setZoom(1);
@@ -113,5 +121,7 @@ export function useImageView(imageData) {
     toggleChannel,
     selectTool,
     setPixel,
+    preview,
+    setPreview,
   };
 }
