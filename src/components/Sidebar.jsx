@@ -16,6 +16,7 @@ export default function Sidebar({
   onToggleChannel,
   onOpenLevels,
   onOpenResize,
+  onOpenFilter,
 }) {
   return (
     <aside className="panel">
@@ -58,6 +59,9 @@ export default function Sidebar({
           </button>
           <button className="button wide-button" type="button" onClick={onOpenResize} disabled={!hasImage}>
             Размер изображения…
+          </button>
+          <button className="button wide-button" type="button" onClick={onOpenFilter} disabled={!hasImage}>
+            Фильтрация…
           </button>
         </div>
       </section>

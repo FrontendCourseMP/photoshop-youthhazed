@@ -7,6 +7,7 @@ import CanvasStage from "./components/CanvasStage.jsx";
 import StatusBar from "./components/StatusBar.jsx";
 import LevelsDialog from "./components/LevelsDialog.jsx";
 import ResizeDialog from "./components/ResizeDialog.jsx";
+import FilterDialog from "./components/FilterDialog.jsx";
 
 export default function App() {
   const inputRef = useRef(null);
@@ -16,6 +17,7 @@ export default function App() {
   const hasImage = Boolean(imageData);
   const [levelsOpen, setLevelsOpen] = useState(false);
   const [resizeOpen, setResizeOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   function openFileDialog() {
     inputRef.current?.click();
@@ -38,6 +40,12 @@ export default function App() {
   function applyResizeResult(nextImageData) {
     replaceImage(nextImageData);
     setResizeOpen(false);
+  }
+
+  function applyFilterResult(nextImageData) {
+    view.setPreview(null);
+    replaceImage(nextImageData);
+    setFilterOpen(false);
   }
 
   return (
@@ -68,6 +76,7 @@ export default function App() {
           onToggleChannel={view.toggleChannel}
           onOpenLevels={() => setLevelsOpen(true)}
           onOpenResize={() => setResizeOpen(true)}
+          onOpenFilter={() => setFilterOpen(true)}
         />
 
         <CanvasStage
@@ -104,6 +113,14 @@ export default function App() {
         source={imageData}
         onApply={applyResizeResult}
         onClose={() => setResizeOpen(false)}
+      />
+
+      <FilterDialog
+        open={filterOpen}
+        source={imageData}
+        onPreview={view.setPreview}
+        onApply={applyFilterResult}
+        onClose={() => setFilterOpen(false)}
       />
     </div>
   );

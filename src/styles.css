@@ -157,6 +157,19 @@ h1 { font-size: 18px; line-height: 1.2; }
 .resize-stats dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
 .resize-stats dd { margin: 0; font-size: 13px; font-weight: 600; }
 
+.kernel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kernel-grid input {
+  min-height: 40px;
+  padding: 0 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: center;
+}
+.checks-row { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 2px; }
+.checks-row .field-inline { color: var(--text); }
+
 /* Модальное окно (общий компонент) */
 .modal {
   width: min(440px, calc(100vw - 32px));
