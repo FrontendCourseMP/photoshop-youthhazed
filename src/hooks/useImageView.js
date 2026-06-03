@@ -1,6 +1,10 @@
 // UI-состояние просмотра изображения: видимые каналы, масштаб, активный
 // инструмент и выбранный пиксель. Характеристики изображения вычисляются
 // один раз на загрузку и переиспользуются всеми производными значениями.
+//
+// Сброс вида и автоподгонка происходят только при НОВОЙ загрузке файла
+// (по счётчику generation), а не при редактировании (уровни, ресайз),
+// чтобы выбранный пользователем масштаб и видимость каналов сохранялись.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -12,7 +16,11 @@ import {
   normalizeChannels,
 } from "../lib/image.js";
 
-export function useImageView(imageData) {
+export const ZOOM_MIN = 0.12;
+export const ZOOM_MAX = 3;
+const FIT_PADDING = 50; // отступ с каждой стороны при подгонке
+
+export function useImageView(imageData, generation) {
   const stageRef = useRef(null);
   const [channels, setChannels] = useState(defaultChannels);
   const [zoom, setZoom] = useState(1);
@@ -46,9 +54,11 @@ export function useImageView(imageData) {
   }, [renderSource, characteristics, channels]);
 
   const changeZoom = useCallback((nextZoom) => {
-    setZoom(Math.min(8, Math.max(0.05, nextZoom)));
+    setZoom(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, nextZoom)));
   }, []);
 
+  // Подгонка: изображение целиком помещается в холст с отступом 50px,
+  // масштаб ограничен диапазоном 12%–300%.
   const fitToView = useCallback(() => {
     if (!imageData || !stageRef.current) {
       return;
@@ -56,12 +66,11 @@ export function useImageView(imageData) {
 
     const bounds = stageRef.current.getBoundingClientRect();
     const scale = Math.min(
-      (bounds.width - 48) / imageData.width,
-      (bounds.height - 48) / imageData.height,
-      1,
+      (bounds.width - FIT_PADDING * 2) / imageData.width,
+      (bounds.height - FIT_PADDING * 2) / imageData.height,
     );
 
-    changeZoom(Number(Math.max(0.05, scale).toFixed(3)));
+    changeZoom(Number(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, scale)).toFixed(3)));
   }, [imageData, changeZoom]);
 
   const toggleChannel = useCallback(
@@ -80,32 +89,29 @@ export function useImageView(imageData) {
     }
   }, []);
 
-  // Сброс вида при смене изображения и автоподгонка под холст.
+  // Последние значения для эффекта сброса (он не должен реагировать на
+  // их изменение, только на смену generation).
+  const imageRef = useRef(imageData);
+  const characteristicsRef = useRef(characteristics);
+  const fitRef = useRef(fitToView);
+  imageRef.current = imageData;
+  characteristicsRef.current = characteristics;
+  fitRef.current = fitToView;
+
   useEffect(() => {
     setPreview(null);
+    setPixel(null);
+    setActiveTool("cursor");
 
-    if (!imageData) {
+    if (!imageRef.current) {
       setChannels(defaultChannels);
       setZoom(1);
-      setActiveTool("cursor");
-      setPixel(null);
       return;
     }
 
-    setChannels(normalizeChannels(characteristics, defaultChannels));
-    setPixel(null);
-    requestAnimationFrame(fitToView);
-  }, [imageData, characteristics, fitToView]);
-
-  useEffect(() => {
-    if (!imageData || !stageRef.current) {
-      return undefined;
-    }
-
-    const observer = new ResizeObserver(fitToView);
-    observer.observe(stageRef.current);
-    return () => observer.disconnect();
-  }, [imageData, fitToView]);
+    setChannels(normalizeChannels(characteristicsRef.current, defaultChannels));
+    requestAnimationFrame(() => fitRef.current());
+  }, [generation]);
 
   return {
     stageRef,

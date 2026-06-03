@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { samplePixel } from "../lib/image.js";
+import { resample } from "../lib/interpolation.js";
 
 export default function CanvasStage({
   stageRef,
@@ -12,21 +13,36 @@ export default function CanvasStage({
   onPick,
 }) {
   const canvasRef = useRef(null);
+  const rafRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Масштабирование для вывода выполняется собственной интерполяцией
+  // (resample), а не CSS: холст рисуется 1:1 в целевом размере.
+  // Перерисовка скоалесцирована через requestAnimationFrame.
   useEffect(() => {
     if (!visibleImageData || !canvasRef.current) {
-      return;
+      return undefined;
     }
 
-    const canvas = canvasRef.current;
-    canvas.width = visibleImageData.width;
-    canvas.height = visibleImageData.height;
-    canvas.style.width = `${Math.max(1, Math.round(visibleImageData.width * zoom))}px`;
-    canvas.style.height = `${Math.max(1, Math.round(visibleImageData.height * zoom))}px`;
+    const dstWidth = Math.max(1, Math.round(visibleImageData.width * zoom));
+    const dstHeight = Math.max(1, Math.round(visibleImageData.height * zoom));
 
-    const context = canvas.getContext("2d", { willReadFrequently: true });
-    context.putImageData(visibleImageData, 0, 0);
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const scaled =
+        zoom === 1 ? visibleImageData : resample(visibleImageData, dstWidth, dstHeight);
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        return;
+      }
+      canvas.width = scaled.width;
+      canvas.height = scaled.height;
+      canvas.style.width = `${scaled.width}px`;
+      canvas.style.height = `${scaled.height}px`;
+      canvas.getContext("2d", { willReadFrequently: true }).putImageData(scaled, 0, 0);
+    });
+
+    return () => cancelAnimationFrame(rafRef.current);
   }, [visibleImageData, zoom]);
 
   function handleDrop(event) {

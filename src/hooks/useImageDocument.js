@@ -11,6 +11,9 @@ export function useImageDocument() {
   const [meta, setMeta] = useState(emptyMeta);
   const [status, setStatus] = useState("Готово");
   const [isError, setIsError] = useState(false);
+  // Увеличивается при загрузке нового файла и при закрытии, но НЕ при
+  // редактировании — по нему вид сбрасывается и подгоняется заново.
+  const [generation, setGeneration] = useState(0);
 
   const setStatusMessage = useCallback((message, error = false) => {
     setStatus(message);
@@ -20,6 +23,7 @@ export function useImageDocument() {
   const clear = useCallback(() => {
     setImageData(null);
     setMeta(emptyMeta);
+    setGeneration((value) => value + 1);
   }, []);
 
   // Замена изображения результатом редактирования (уровни, фильтр, ресайз).
@@ -41,6 +45,7 @@ export function useImageDocument() {
         const document = await loadImageFile(file);
         setImageData(document.imageData);
         setMeta(document.meta);
+        setGeneration((value) => value + 1);
         setStatusMessage("Изображение загружено.");
       } catch (error) {
         clear();
@@ -66,5 +71,5 @@ export function useImageDocument() {
     [imageData, meta.fileName, setStatusMessage],
   );
 
-  return { imageData, meta, status, isError, load, clear, save, replaceImage };
+  return { imageData, meta, status, isError, generation, load, clear, save, replaceImage };
 }

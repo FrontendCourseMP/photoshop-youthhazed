@@ -6,13 +6,16 @@ import Sidebar from "./components/Sidebar.jsx";
 import CanvasStage from "./components/CanvasStage.jsx";
 import StatusBar from "./components/StatusBar.jsx";
 import LevelsDialog from "./components/LevelsDialog.jsx";
+import ResizeDialog from "./components/ResizeDialog.jsx";
 
 export default function App() {
   const inputRef = useRef(null);
-  const { imageData, meta, status, isError, load, clear, save, replaceImage } = useImageDocument();
-  const view = useImageView(imageData);
+  const { imageData, meta, status, isError, generation, load, clear, save, replaceImage } =
+    useImageDocument();
+  const view = useImageView(imageData, generation);
   const hasImage = Boolean(imageData);
   const [levelsOpen, setLevelsOpen] = useState(false);
+  const [resizeOpen, setResizeOpen] = useState(false);
 
   function openFileDialog() {
     inputRef.current?.click();
@@ -30,6 +33,11 @@ export default function App() {
     view.setPreview(null);
     replaceImage(nextImageData);
     setLevelsOpen(false);
+  }
+
+  function applyResizeResult(nextImageData) {
+    replaceImage(nextImageData);
+    setResizeOpen(false);
   }
 
   return (
@@ -59,6 +67,7 @@ export default function App() {
           channels={view.channels}
           onToggleChannel={view.toggleChannel}
           onOpenLevels={() => setLevelsOpen(true)}
+          onOpenResize={() => setResizeOpen(true)}
         />
 
         <CanvasStage
@@ -88,6 +97,13 @@ export default function App() {
         onPreview={view.setPreview}
         onApply={applyLevelsResult}
         onClose={() => setLevelsOpen(false)}
+      />
+
+      <ResizeDialog
+        open={resizeOpen}
+        source={imageData}
+        onApply={applyResizeResult}
+        onClose={() => setResizeOpen(false)}
       />
     </div>
   );

@@ -140,6 +140,22 @@ h1 { font-size: 18px; line-height: 1.2; }
 .channel-card.on .channel-dot { background: var(--accent); border-color: var(--accent); }
 
 .wide-button { width: 100%; padding: 0 14px; }
+.stack { display: grid; gap: 8px; }
+.zoom-range { width: 100%; margin-top: 10px; accent-color: var(--accent); }
+
+.hint { margin: 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+.field-error { margin: 0; font-size: 12px; color: var(--danger); }
+.resize-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0; }
+.resize-stats div {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+.resize-stats dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+.resize-stats dd { margin: 0; font-size: 13px; font-weight: 600; }
 
 /* Модальное окно (общий компонент) */
 .modal {

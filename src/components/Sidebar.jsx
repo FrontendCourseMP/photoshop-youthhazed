@@ -15,6 +15,7 @@ export default function Sidebar({
   channels,
   onToggleChannel,
   onOpenLevels,
+  onOpenResize,
 }) {
   return (
     <aside className="panel">
@@ -51,9 +52,14 @@ export default function Sidebar({
 
       <section>
         <h2>Коррекция</h2>
-        <button className="button wide-button" type="button" onClick={onOpenLevels} disabled={!hasImage}>
-          Уровни…
-        </button>
+        <div className="stack">
+          <button className="button wide-button" type="button" onClick={onOpenLevels} disabled={!hasImage}>
+            Уровни…
+          </button>
+          <button className="button wide-button" type="button" onClick={onOpenResize} disabled={!hasImage}>
+            Размер изображения…
+          </button>
+        </div>
       </section>
 
       <section>
@@ -64,6 +70,17 @@ export default function Sidebar({
           <button className="small-button" type="button" onClick={() => onZoom(zoom * 1.25)} disabled={!hasImage}>+</button>
           <button className="small-button fit" type="button" onClick={onFit} disabled={!hasImage}>Подогнать</button>
         </div>
+        <input
+          className="zoom-range"
+          type="range"
+          min={12}
+          max={300}
+          step={1}
+          value={Math.round(zoom * 100)}
+          onChange={(event) => onZoom(Number(event.target.value) / 100)}
+          disabled={!hasImage}
+          aria-label="Масштаб, проценты"
+        />
       </section>
 
       <section>
