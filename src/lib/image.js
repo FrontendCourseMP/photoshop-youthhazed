@@ -130,6 +130,27 @@ export function composeVisibleImageData(source, characteristics, channelState) {
   return new ImageData(next, source.width, source.height);
 }
 
+const CHANNEL_OFFSET = { gray: 0, red: 0, green: 1, blue: 2, alpha: 3 };
+
+// Возвращает содержимое одного канала как изображение в градациях серого
+// (белый = максимальная интенсивность канала, чёрный = отсутствие).
+// Альфа традиционно тоже показывается чёрно-белой маской.
+export function extractChannelImageData(source, channelId) {
+  const offset = CHANNEL_OFFSET[channelId] ?? 0;
+  const { data, width, height } = source;
+  const out = new Uint8ClampedArray(data.length);
+
+  for (let index = 0; index < data.length; index += 4) {
+    const value = data[index + offset];
+    out[index] = value;
+    out[index + 1] = value;
+    out[index + 2] = value;
+    out[index + 3] = 255;
+  }
+
+  return new ImageData(out, width, height);
+}
+
 export function samplePixel(imageData, x, y) {
   const index = (y * imageData.width + x) * 4;
   const red = imageData.data[index];

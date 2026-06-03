@@ -41,6 +41,7 @@ export default function App() {
           meta={meta}
           modeLabel={view.modeLabel}
           hasImage={hasImage}
+          sourceImageData={imageData}
           activeTool={view.activeTool}
           onSelectTool={view.selectTool}
           zoom={view.zoom}

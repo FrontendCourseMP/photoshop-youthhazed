@@ -1,9 +1,11 @@
 import { formatBytes } from "../lib/fileio.js";
+import ChannelPanel from "./ChannelPanel.jsx";
 
 export default function Sidebar({
   meta,
   modeLabel,
   hasImage,
+  sourceImageData,
   activeTool,
   onSelectTool,
   zoom,
@@ -58,22 +60,12 @@ export default function Sidebar({
 
       <section>
         <h2>Каналы</h2>
-        {descriptors.length ? (
-          <div className="channel-list">
-            {descriptors.map((descriptor) => (
-              <label className="channel" key={descriptor.id}>
-                <input
-                  type="checkbox"
-                  checked={channels[descriptor.id]}
-                  onChange={() => onToggleChannel(descriptor.id)}
-                />
-                <span>{descriptor.label}</span>
-              </label>
-            ))}
-          </div>
-        ) : (
-          <p className="note">Каналы появятся после открытия файла.</p>
-        )}
+        <ChannelPanel
+          source={sourceImageData}
+          descriptors={descriptors}
+          channels={channels}
+          onToggle={onToggleChannel}
+        />
       </section>
 
       <section>
