@@ -76,7 +76,9 @@ export function buildLut({ black, white, gamma }) {
 // Сначала действуют поканальные LUT (R/G/B/A), затем мастер-LUT на R/G/B.
 export function applyLevels(source, levels) {
   const { data, width, height } = source;
-  const out = new Uint8ClampedArray(data);
+  // Все 4 канала каждого пикселя перезаписываются ниже, поэтому копировать
+  // исходный буфер не нужно.
+  const out = new Uint8ClampedArray(data.length);
 
   const master = buildLut(levels.master);
   const red = buildLut(levels.red);

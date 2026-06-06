@@ -38,13 +38,26 @@ function sampleChannel(data, width, height, x, y, channel, edge) {
 // Невыбранные каналы остаются без изменений. Делитель = сумма ядра
 // (или 1, если сумма равна 0 — для оператора Прюитта и подобных).
 export function convolveData(data, width, height, kernel, channelFlags, edge) {
+  // Копия нужна: невыбранные каналы остаются без изменений.
   const out = new Uint8ClampedArray(data);
   const sum = kernel.reduce((accumulator, value) => accumulator + value, 0);
   const divisor = sum === 0 ? 1 : sum;
 
+  // Байтовые смещения 9 соседей для внутренних пикселей (одинаковы везде).
+  const neighborOffset = new Int32Array(9);
+  let offsetIndex = 0;
+  for (let dy = -1; dy <= 1; dy += 1) {
+    for (let dx = -1; dx <= 1; dx += 1) {
+      neighborOffset[offsetIndex] = (dy * width + dx) * 4;
+      offsetIndex += 1;
+    }
+  }
+
   for (let y = 0; y < height; y += 1) {
+    const interiorRow = y >= 1 && y < height - 1;
     for (let x = 0; x < width; x += 1) {
       const dstIndex = (y * width + x) * 4;
+      const interior = interiorRow && x >= 1 && x < width - 1;
 
       for (let channel = 0; channel < 4; channel += 1) {
         if (!channelFlags[channel]) {
@@ -52,12 +65,20 @@ export function convolveData(data, width, height, kernel, channelFlags, edge) {
         }
 
         let accumulator = 0;
-        let k = 0;
-        for (let ky = -1; ky <= 1; ky += 1) {
-          for (let kx = -1; kx <= 1; kx += 1) {
-            accumulator +=
-              sampleChannel(data, width, height, x + kx, y + ky, channel, edge) * kernel[k];
-            k += 1;
+        if (interior) {
+          // Быстрый путь: прямая адресация без проверок границ.
+          const center = dstIndex + channel;
+          for (let k = 0; k < 9; k += 1) {
+            accumulator += data[center + neighborOffset[k]] * kernel[k];
+          }
+        } else {
+          let k = 0;
+          for (let ky = -1; ky <= 1; ky += 1) {
+            for (let kx = -1; kx <= 1; kx += 1) {
+              accumulator +=
+                sampleChannel(data, width, height, x + kx, y + ky, channel, edge) * kernel[k];
+              k += 1;
+            }
           }
         }
 

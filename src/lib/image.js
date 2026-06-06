@@ -92,12 +92,25 @@ export function normalizeChannels(characteristics, nextChannels) {
 }
 
 export function composeVisibleImageData(source, characteristics, channelState) {
-  const next = new Uint8ClampedArray(source.data);
   const { grayscale, alpha } = characteristics;
   const hasVisibleColor = grayscale
     ? channelState.gray
     : channelState.red || channelState.green || channelState.blue;
+  const allColorVisible = grayscale
+    ? channelState.gray
+    : channelState.red && channelState.green && channelState.blue;
+  const alphaVisible = !alpha || channelState.alpha;
+
+  // Частый случай (вид по умолчанию): все каналы включены — результат
+  // совпадает с источником. Возвращаем его без аллокаций и без прохода.
+  if (allColorVisible && alphaVisible) {
+    return source;
+  }
+
   const showOnlyAlpha = alpha && channelState.alpha && !hasVisibleColor;
+  // Цикл ниже записывает все 4 байта каждого пикселя, поэтому копировать
+  // исходный буфер не нужно — достаточно выделить новый.
+  const next = new Uint8ClampedArray(source.data.length);
 
   for (let index = 0; index < next.length; index += 4) {
     const red = source.data[index];
@@ -128,27 +141,6 @@ export function composeVisibleImageData(source, characteristics, channelState) {
   }
 
   return new ImageData(next, source.width, source.height);
-}
-
-const CHANNEL_OFFSET = { gray: 0, red: 0, green: 1, blue: 2, alpha: 3 };
-
-// Возвращает содержимое одного канала как изображение в градациях серого
-// (белый = максимальная интенсивность канала, чёрный = отсутствие).
-// Альфа традиционно тоже показывается чёрно-белой маской.
-export function extractChannelImageData(source, channelId) {
-  const offset = CHANNEL_OFFSET[channelId] ?? 0;
-  const { data, width, height } = source;
-  const out = new Uint8ClampedArray(data.length);
-
-  for (let index = 0; index < data.length; index += 4) {
-    const value = data[index + offset];
-    out[index] = value;
-    out[index + 1] = value;
-    out[index + 2] = value;
-    out[index + 3] = 255;
-  }
-
-  return new ImageData(out, width, height);
 }
 
 export function samplePixel(imageData, x, y) {
