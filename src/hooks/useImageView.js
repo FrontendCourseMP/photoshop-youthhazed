@@ -18,7 +18,7 @@ import {
 
 export const ZOOM_MIN = 0.12;
 export const ZOOM_MAX = 3;
-const FIT_PADDING = 50; // отступ с каждой стороны при подгонке
+export const FIT_PADDING = 50;
 
 export function useImageView(imageData, generation) {
   const stageRef = useRef(null);
@@ -64,10 +64,11 @@ export function useImageView(imageData, generation) {
       return;
     }
 
-    const bounds = stageRef.current.getBoundingClientRect();
+    const availableWidth = Math.max(1, stageRef.current.clientWidth - FIT_PADDING * 2);
+    const availableHeight = Math.max(1, stageRef.current.clientHeight - FIT_PADDING * 2);
     const scale = Math.min(
-      (bounds.width - FIT_PADDING * 2) / imageData.width,
-      (bounds.height - FIT_PADDING * 2) / imageData.height,
+      availableWidth / imageData.width,
+      availableHeight / imageData.height,
     );
 
     changeZoom(Number(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, scale)).toFixed(3)));

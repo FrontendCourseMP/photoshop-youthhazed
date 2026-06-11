@@ -86,11 +86,13 @@ export default function CanvasStage({
         onDrop={handleDrop}
       >
         {hasImage ? (
-          <canvas
-            ref={canvasRef}
-            className={activeTool === "eyedropper" ? "eyedropper" : ""}
-            onClick={handleClick}
-          />
+          <div className="canvas-viewport">
+            <canvas
+              ref={canvasRef}
+              className={activeTool === "eyedropper" ? "eyedropper" : ""}
+              onClick={handleClick}
+            />
+          </div>
         ) : (
           <div className="empty-state">
             <strong>Загрузите изображение</strong>
